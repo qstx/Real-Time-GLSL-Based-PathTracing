@@ -48,9 +48,9 @@ namespace GLSLPT
         Vec3 right;
         Vec3 forward;
 
-        float focalDist;
-        float aperture;
-        float fov;
+        float focalDist;//焦距
+        float aperture;//光圈
+        float fov;//可能是水平fov
         bool isMoving;
 
     private:

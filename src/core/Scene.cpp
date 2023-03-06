@@ -58,7 +58,7 @@ namespace GLSLPT
         delete camera;
         camera = new Camera(pos, lookAt, fov);
     }
-
+    //向场景中加载Mesh，若场景中含有该Mesh则直接返回索引，反之将Mesh添加后返回其索引
     int Scene::AddMesh(const std::string& filename)
     {
         int id = -1;
@@ -81,7 +81,7 @@ namespace GLSLPT
         }
         return id;
     }
-
+    //向场景中加载Texture，若场景中含有该Texture则直接返回索引，反之将Texture添加后返回其索引
     int Scene::AddTexture(const std::string& filename)
     {
         int id = -1;
@@ -105,14 +105,14 @@ namespace GLSLPT
 
         return id;
     }
-
+    //向场景中加载Material，似乎不考虑重复性
     int Scene::AddMaterial(const Material& material)
     {
         int id = materials.size();
         materials.push_back(material);
         return id;
     }
-
+    //向场景中加载EnvironmentMap，似乎不考虑重复性
     void Scene::AddEnvMap(const std::string& filename)
     {
         if (envMap)
@@ -130,21 +130,21 @@ namespace GLSLPT
         envMapModified = true;
         dirty = true;
     }
-
+    //向场景中加载MeshInstance
     int Scene::AddMeshInstance(const MeshInstance& meshInstance)
     {
         int id = meshInstances.size();
         meshInstances.push_back(meshInstance);
         return id;
     }
-
+    //向场景中加载Light
     int Scene::AddLight(const Light& light)
     {
         int id = lights.size();
         lights.push_back(light);
         return id;
     }
-
+    //Build scene BVH
     void Scene::createTLAS()
     {
         // Loop through all the mesh Instances and build a Top Level BVH
@@ -185,7 +185,8 @@ namespace GLSLPT
         sceneBvh->Build(&bounds[0], bounds.size());
         sceneBounds = sceneBvh->Bounds();
     }
-
+    //Process scene data
+    //为场景中所有使用到的Mesh都构建BVH
     void Scene::createBLAS()
     {
         // Loop through all meshes and build BVHs

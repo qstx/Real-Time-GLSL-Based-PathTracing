@@ -38,7 +38,7 @@ namespace GLSLPT
         return new Program(shaders);
     }
 
-    Renderer::Renderer(Scene* scene, const std::string& shadersDirectory)
+    Renderer::Renderer(Scene* scene, const std::string& shadersDirectory)//根据指定Scene构建Renderer
         : scene(scene)
         , BVHBuffer(0)
         , BVHTex(0)

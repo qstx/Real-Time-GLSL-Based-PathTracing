@@ -53,15 +53,17 @@ using namespace GLSLPT;
 Scene* scene = nullptr;
 Renderer* renderer = nullptr;
 
+//全局变量，记录所有场景的文件路径
 std::vector<string> sceneFiles;
+//全局变量，记录所有环境贴图的文件路径
 std::vector<string> envMaps;
 
 float mouseSensitivity = 0.01f;
 bool keyPressed = false;
-int sampleSceneIdx = 0;
-int selectedInstance = 0;
+int sampleSceneIdx = 0;//当前选择场景在所有场景列表的索引
+int selectedInstance = 0;//可能是gui中选择的MeshInstance对象
 double lastTime = SDL_GetTicks();
-int envMapIdx = 0;
+int envMapIdx = 0;//当前选择环境贴图在所有环境贴图列表的索引
 bool done = false;
 
 std::string shadersDir = "../src/shaders/";
@@ -96,7 +98,7 @@ void GetSceneFiles()
 
     tinydir_close(&dir);
 }
-
+//使用tinydir库读取环境贴图文件，将所有文件类型为.hdr的文件完整路径记录到envMaps向量
 void GetEnvMaps()
 {
     tinydir_dir dir;
@@ -117,7 +119,7 @@ void GetEnvMaps()
 
     tinydir_close(&dir);
 }
-
+//根据scene文件类型选择不同的加载函数，获取其中的各个物体的文件路径以及渲染设置renderOptions
 void LoadScene(std::string sceneName)
 {
     delete scene;
@@ -537,6 +539,7 @@ void MainLoop(void* arg)
 
 int main(int argc, char** argv)
 {
+    //初始化随机数种子
     srand((unsigned int)time(0));
 
     std::string sceneFile;
@@ -554,7 +557,7 @@ int main(int argc, char** argv)
             exit(0);
         }
     }
-
+    //判断参数值是否含有场景名，然后记录所有环境贴图文件路径并加载指定或默认第一个场景
     if (!sceneFile.empty())
     {
         scene = new Scene();

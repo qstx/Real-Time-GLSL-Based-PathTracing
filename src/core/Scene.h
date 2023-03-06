@@ -44,15 +44,15 @@ namespace GLSLPT
     {
         RectLight,
         SphereLight,
-        DistantLight
+        DistantLight//平行光
     };
 
     struct Light
     {
         Vec3 position;
         Vec3 emission;
-        Vec3 u;
-        Vec3 v;
+        Vec3 u;//跟矩形光有关系，暂时不懂
+        Vec3 v;//跟矩形光有关系，暂时不懂
         float radius;
         float area;
         float type;

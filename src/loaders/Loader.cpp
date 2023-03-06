@@ -77,7 +77,7 @@ namespace GLSLPT
             //--------------------------------------------
             // Material
 
-            if (sscanf(line, " material %s", name) == 1)
+            if (sscanf(line, " material %s", name) == 1)//sscanf函数从line字符串读取输入，返回匹配的个数
             {
                 Material material;
                 char albedoTexName[100] = "none";
@@ -386,7 +386,7 @@ namespace GLSLPT
                 while (fgets(line, kMaxLineLength, file))
                 {
                     // end group
-                    if (strchr(line, '}'))
+                    if (strchr(line, '}'))//strchr() 用于查找字符串中的一个字符，并返回该字符在字符串中第一次出现的位置
                         break;
 
                     char file[2048];

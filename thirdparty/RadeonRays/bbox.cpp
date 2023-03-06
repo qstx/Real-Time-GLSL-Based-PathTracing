@@ -33,13 +33,12 @@ namespace RadeonRays
 		return 2.f * (ext.x * ext.y + ext.x * ext.z + ext.y * ext.z);
 	}
 
-	// Grow the bounding box by a point
 	void bbox::grow(Vec3 const& p)
 	{
 		pmin = Vec3::Min(pmin, p);
 		pmax = Vec3::Max(pmax, p);
 	}
-	// Grow the bounding box by a box
+
 	void bbox::grow(bbox const& b)
 	{
 		pmin = Vec3::Min(pmin, b.pmin);

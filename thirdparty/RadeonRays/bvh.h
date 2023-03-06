@@ -51,6 +51,7 @@ namespace RadeonRays
         ~Bvh() = default;
 
         // World space bounding box
+        //应该是返回当前BVH树在世界坐标下的包围盒
         bbox const& Bounds() const;
 
         // Build function
@@ -133,8 +134,10 @@ namespace RadeonRays
         // SAH flag
         bool m_usesah;
         // Tree height
+        //应该是当前节点在BVH树中的高度
         int m_height;
         // Node traversal cost
+        //应该是节点遍历成本
         float m_traversal_cost;
         // Number of spatial bins to use for SAH
         int m_num_bins;

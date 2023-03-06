@@ -32,6 +32,7 @@ namespace GLSLPT
     class Mesh
     {
     public:
+        //每个Mesh在构造时都有定义一个Bvh指针
         Mesh()
         {
             bvh = new RadeonRays::SplitBvh(2.0f, 64, 0, 0.001f, 0);
@@ -40,10 +41,12 @@ namespace GLSLPT
         ~Mesh() { delete bvh; }
 
         void BuildBVH();
+        //使用tinyobjloader加载顶点属性、mesh顶点索引
+        //最终获取Mesh中的verticesUVX和normalsUVY
         bool LoadFromFile(const std::string& filename);
 
-        std::vector<Vec4> verticesUVX; // Vertex + texture Coord (u/s)
-        std::vector<Vec4> normalsUVY;  // Normal + texture Coord (v/t)
+        std::vector<Vec4> verticesUVX; // Vertex + texture Coord (u/s),即顶点坐标加uv.x
+        std::vector<Vec4> normalsUVY;  // Normal + texture Coord (v/t),即顶点坐标加uv.y
 
         RadeonRays::Bvh* bvh;
         std::string name;

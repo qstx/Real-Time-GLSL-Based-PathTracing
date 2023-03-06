@@ -40,7 +40,7 @@ namespace GLSLPT
         float p = atan2f(v.z, v.x);
         return (p < 0.f) ? p + 2.f * PI : p;
     }
-
+    
     bool Mesh::LoadFromFile(const std::string& filename)
     {
         name = filename;

@@ -91,7 +91,7 @@ namespace GLSLPT
         bool hideEmitters;
         bool enableBackground;
         bool transparentBackground;
-        bool independentRenderSize;
+        bool independentRenderSize;//∆¡ƒª≥ﬂ¥Á∫Õ‰÷»æ≥ﬂ¥Á «∑Ò∂¿¡¢
         bool enableRoughnessMollification;
         bool enableVolumeMIS;
         float envMapIntensity;
