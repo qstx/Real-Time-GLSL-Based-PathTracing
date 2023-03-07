@@ -39,7 +39,7 @@ namespace GLSLPT
             //bvh = new RadeonRays::Bvh(2.0f, 64, false);
         }
         ~Mesh() { delete bvh; }
-
+        //先为Mesh中每一个三角形构造一个bbox，然后根据所有三角形的bbox构建Mesh的BVH
         void BuildBVH();
         //使用tinyobjloader加载顶点属性、mesh顶点索引
         //最终获取Mesh中的verticesUVX和normalsUVY

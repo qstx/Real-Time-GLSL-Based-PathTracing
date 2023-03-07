@@ -41,7 +41,7 @@ namespace RadeonRays
     class bbox
     {
     public:
-        //默认构造一个无穷大的包围盒
+        //默认构造一个不存在的包围盒
         bbox()
             : pmin(Vec3(std::numeric_limits<float>::max(),
                         std::numeric_limits<float>::max(),

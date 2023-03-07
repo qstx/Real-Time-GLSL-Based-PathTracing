@@ -56,6 +56,7 @@ namespace RadeonRays
 
         // Build function
         // bounds is an array of bounding boxes
+        //根据一组bbox构建他们的BVH
         void Build(bbox const* bounds, int numbounds);
 
         // Get tree height
@@ -73,13 +74,23 @@ namespace RadeonRays
         virtual void PrintStatistics(std::ostream& os) const;
     protected:
         // Build function
+        //Build函数的具体实现，利用虚函数特性，拥有不同的实现细节
         virtual void BuildImpl(bbox const* bounds, int numbounds);
         // BVH node
         struct Node;
         // Node allocation
+        //从之前分配的m_nodes数组中获取最后一个未赋值的Node地址
         virtual Node* AllocateNode();
+        //可能是初始化m_nodecnt，并保证m_nodes有足够空间保存所有Node
         virtual void  InitNodeAllocator(size_t maxnum);
-
+        //可能包含
+        //1)请求的起始索引
+        //2)图元数量
+        //3)根节点地址的地址
+        //4)包围盒
+        //5)包围盒中心点的包围盒
+        //6)Level
+        //7)Node索引
         struct SplitRequest
         {
             // Starting index of a request
@@ -106,6 +117,11 @@ namespace RadeonRays
             float overlap;
         };
 
+        //可能是根据以下信息构建BVH的Node
+        //1)SplitRequest
+        //2)所有包围盒
+        //3)所有包围盒的中心
+        //4)所有图元的索引
         void BuildNode(SplitRequest const& req, bbox const* bounds, Vec3 const* centroids, int* primindices);
 
         SahSplit FindSahSplit(SplitRequest const& req, bbox const* bounds, Vec3 const* centroids, int* primindices) const;
@@ -120,11 +136,14 @@ namespace RadeonRays
         // Bvh nodes
         std::vector<Node> m_nodes;
         // Identifiers of leaf primitives
+        //可能是存储叶节点图元的索引
         std::vector<int> m_indices;
         // Node allocator counter, atomic for thread safety
         std::atomic<int> m_nodecnt;
 
         // Identifiers of leaf primitives
+        //可能是存储BVH构建过程中已经遍历到的叶节点图元的索引
+        //即按照BVH构造后图元索引的重排列
         std::vector<int> m_packed_indices;
 
         // Bounding box containing all primitives
@@ -137,7 +156,7 @@ namespace RadeonRays
         //应该是当前节点在BVH树中的高度
         int m_height;
         // Node traversal cost
-        //应该是节点遍历成本
+        //应该是当前节点的遍历成本
         float m_traversal_cost;
         // Number of spatial bins to use for SAH
         int m_num_bins;
@@ -149,7 +168,11 @@ namespace RadeonRays
 
 		friend class BvhTranslator;
     };
-
+    //可能包含
+    //1)Node的世界坐标下包围盒
+    //2)Node的类型(内部节点/外部节点)
+    //3)Node在整个BVH树中的索引
+    //4)union(对于内部节点：左右子树的指针，对于叶节点：图元的起始索引和图元数量)
     struct Bvh::Node
     {
         // Node bounds in world space

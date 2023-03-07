@@ -126,7 +126,9 @@ namespace GLSLPT
 
     private:
         RadeonRays::Bvh* sceneBvh;
+        //类似DXR创建底层加速结构bottom level acceleration structure
         void createBLAS();
+        //类似DXR创建顶层加速结构top level acceleration structure
         void createTLAS();
     };
 }

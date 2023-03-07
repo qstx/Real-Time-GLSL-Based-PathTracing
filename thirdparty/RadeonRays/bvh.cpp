@@ -40,12 +40,13 @@ namespace RadeonRays
 
     void Bvh::Build(bbox const* bounds, int numbounds)
     {
+        //先计算整个Mesh的bbox
         for (int i = 0; i < numbounds; ++i)
         {
             // Calc bbox
             m_bounds.grow(bounds[i]);
         }
-
+        //Build的真正实现
         BuildImpl(bounds, numbounds);
     }
 
@@ -79,7 +80,7 @@ namespace RadeonRays
 #ifdef USE_TBB
             primitive_mutex_.lock();
 #endif
-            node->type = kLeaf;
+            node->type = NodeType::kLeaf;
             node->startidx = static_cast<int>(m_packed_indices.size());
             node->numprims = req.numprims;
 
@@ -364,9 +365,10 @@ namespace RadeonRays
         // Cache some stuff to have faster partitioning
         std::vector<Vec3> centroids(numbounds);
         m_indices.resize(numbounds);
-        std::iota(m_indices.begin(), m_indices.end(), 0);
+        //可能是给所有包围盒按照顺序添加从0开始的索引
+        std::iota(m_indices.begin(), m_indices.end(), 0);//std::iota用于生成从val开始、等差为1的等差序列
 
-        // Calc bbox
+        // Calc bbox，计算所有包围盒中心点的包围盒，同时记录每个包围盒的中心
         bbox centroid_bounds;
         for (size_t i = 0; i < static_cast<size_t>(numbounds); ++i)
         {
