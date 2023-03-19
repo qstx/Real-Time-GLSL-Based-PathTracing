@@ -80,7 +80,7 @@ namespace GLSLPT
 
         InitGPUDataBuffers();
         quad = new Quad();
-        pixelRatio = 0.25f;
+        pixelRatio = 1.0f;
 
         InitFBOs();
         InitShaders();
@@ -551,7 +551,8 @@ namespace GLSLPT
             return;
 
         glActiveTexture(GL_TEXTURE0);
-
+        //场景发生变化时的渲染过程：
+        //绑定pathTraceFBOLowRes绘制到pathTraceTextureLowRes
         if (scene->dirty)
         {
             // Renders a low res preview if camera/instances are modified
@@ -563,6 +564,10 @@ namespace GLSLPT
             scene->dirty = false;
             scene->envMapModified = false;
         }
+        //场景没有变化时的渲染过程：
+        //1.绑定pathTraceFBO，从accumTexture采样，渲染到pathTraceTexture(Tile大小)
+        //2.绑定accumFBO，从pathTraceTexture(Tile大小)采样，渲染到accumTexture
+        //3.绑定outputFBO，从accumTexture采样，渲染到tileOutputTexture[currentBuffer]
         else
         {
             // Renders to pathTraceTexture while using previously accumulated samples from accumTexture
@@ -637,7 +642,6 @@ namespace GLSLPT
     {
         return sampleCounter;
     }
-
     void Renderer::Update(float secondsElapsed)
     {
         // If maxSpp was reached then stop updates
@@ -796,7 +800,7 @@ namespace GLSLPT
         glUniform1f(glGetUniformLocation(shaderObject, "envMapIntensity"), scene->renderOptions.envMapIntensity);
         glUniform1f(glGetUniformLocation(shaderObject, "envMapRot"), scene->renderOptions.envMapRot / 360.0f);
         glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->dirty ? 2 : scene->renderOptions.maxDepth);
-        glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
+        //glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
         glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
         glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);
         pathTraceShaderLowRes->StopUsing();

@@ -50,17 +50,18 @@ void main(void)
     jitter.y = r2 < 1.0 ? sqrt(r2) - 1.0 : 1.0 - sqrt(2.0 - r2);
 
     jitter /= (resolution * 0.5);
-    vec2 d = (2.0 * TexCoords - 1.0) + jitter;
+    vec2 d = (2.0 * TexCoords - 1.0) + jitter;//此时还是NDC空间的方向
 
     float scale = tan(camera.fov * 0.5);
     d.y *= resolution.y / resolution.x * scale;
     d.x *= scale;
-    vec3 rayDir = normalize(d.x * camera.right + d.y * camera.up + camera.forward);
+    //此时(d.x,d.y,1)是相机坐标系下的方向
+    vec3 rayDir = normalize(d.x * camera.right + d.y * camera.up + camera.forward);//此时获得了世界坐标系下射线的单位方向向量
 
     vec3 focalPoint = camera.focalDist * rayDir;
     float cam_r1 = rand() * TWO_PI;
     float cam_r2 = rand() * camera.aperture;
-    vec3 randomAperturePos = (cos(cam_r1) * camera.right + sin(cam_r1) * camera.up) * sqrt(cam_r2);
+    vec3 randomAperturePos = (cos(cam_r1) * camera.right + sin(cam_r1) * camera.up) * sqrt(cam_r2);//从光圈内随机选取一个出发点
     vec3 finalRayDir = normalize(focalPoint - randomAperturePos);
 
     Ray ray = Ray(camera.position + randomAperturePos, finalRayDir);

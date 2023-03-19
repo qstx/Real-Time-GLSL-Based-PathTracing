@@ -34,6 +34,7 @@ namespace GLSLPT
     {
     public:
         Quad();
+        ~Quad();
         void Draw(Program*);
 
     private:

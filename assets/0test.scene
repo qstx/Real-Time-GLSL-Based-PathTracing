@@ -2,8 +2,8 @@ renderer
 {
 	resolution 800 800
 	maxdepth 2
-	tilewidth 200
-	tileheight 200
+	tilewidth 800
+	tileheight 800
 	#envmap HDR/sunset.hdr
 	envmapintensity 2.0
 }

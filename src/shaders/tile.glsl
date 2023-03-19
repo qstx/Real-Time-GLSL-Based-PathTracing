@@ -40,6 +40,8 @@ in vec2 TexCoords;
 
 void main(void)
 {
+    //invNumTiles是tile数量的倒数，即((float)tileWidth / renderSize.x, (float)tileHeight / renderSize.y)
+    //tileOffset=((float)tile.x * invNumTiles.x, (float)tile.y * invNumTiles.y)
     vec2 coordsTile = mix(tileOffset, tileOffset + invNumTiles, TexCoords);
 
     InitRNG(gl_FragCoord.xy, frameNum);

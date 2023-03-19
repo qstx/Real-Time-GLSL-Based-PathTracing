@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+//负责向后面的片元着色器传入Quad四角各个点的NDC坐标系和UV坐标
 #version 330
 
 layout (location = 0) in vec2 position;

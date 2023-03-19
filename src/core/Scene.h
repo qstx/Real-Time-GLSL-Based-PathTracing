@@ -119,7 +119,7 @@ namespace GLSLPT
         std::vector<unsigned char> textureMapsArray;
 
         bool initialized;
-        bool dirty;
+        bool dirty;//场景是否发生变化
         // To check if scene elements need to be resent to GPU
         bool instancesModified = false;
         bool envMapModified = false;

@@ -173,7 +173,7 @@ void SaveFrame(const std::string filename)
     printf("Frame saved: %s\n", filename.c_str());
     delete[] data;
 }
-
+//渲染更新，调用renderer->Render()函数和ImGui::Render()函数
 void Render()
 {
     renderer->Render();
@@ -183,7 +183,7 @@ void Render()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
+//逻辑更新，包含相机位姿更新和renderer->Update(secondsElapsed)
 void Update(float secondsElapsed)
 {
     keyPressed = false;
@@ -261,7 +261,11 @@ void EditTransform(const float* view, const float* projection, float* matrix)
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
     ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, NULL);
 }
-
+//每次循环依次执行：
+//1.窗口事件处理
+//2.UI绘制以及UI事件处理
+//3.Update()函数
+//4.Render()函数
 void MainLoop(void* arg)
 {
     LoopData& loopdata = *(LoopData*)arg;

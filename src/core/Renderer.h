@@ -131,16 +131,16 @@ namespace GLSLPT
 
         // Shaders
         std::string shadersDirectory;
-        Program* pathTraceShader;
-        Program* pathTraceShaderLowRes;
-        Program* outputShader;
-        Program* tonemapShader;
+        Program* pathTraceShader;//链接了vertex.glsl和tile.glsl
+        Program* pathTraceShaderLowRes;//链接了vertex.glsl和preview.glsl
+        Program* outputShader;//链接了vertex.glsl和output.glsl
+        Program* tonemapShader;//链接了vertex.glsl和tonemap.glsl
 
         // Render textures
-        GLuint pathTraceTextureLowRes;
-        GLuint pathTraceTexture;
-        GLuint accumTexture;
-        GLuint tileOutputTexture[2];
+        GLuint pathTraceTextureLowRes;//pathTraceFBOLowRes的颜色附件
+        GLuint pathTraceTexture;//pathTraceFBO的颜色附件，尺寸为Tile的大小
+        GLuint accumTexture;//accumFBO的颜色附件
+        GLuint tileOutputTexture[2];//outputFBO的颜色附件(轮流更换)
         GLuint denoisedTexture;
 
         // Render resolution and window resolution
@@ -171,8 +171,11 @@ namespace GLSLPT
 
         void ResizeRenderer();
         void ReloadShaders();
+        //根据场景是否发生改变或者是否到达maxSpp来决定是否渲染
         void Render();
+        //根据设置选取合适Shader绘制默认帧缓冲对象
         void Present();
+        //根据场景是否发生改变或者是否到达maxSpp来决定是否更新渲染数据
         void Update(float secondsElapsed);
         float GetProgress();
         int GetSampleCount();
@@ -180,7 +183,9 @@ namespace GLSLPT
 
     private:
         void InitGPUDataBuffers();
+        //初始化符合需要的帧缓冲对象
         void InitFBOs();
+        //初始化Shader对象
         void InitShaders();
     };
 }

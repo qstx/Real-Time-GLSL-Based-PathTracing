@@ -55,6 +55,12 @@ namespace GLSLPT
         glBindVertexArray(0);
     }
 
+    Quad::~Quad()
+    {
+        glDeleteBuffers(1,&vbo);
+        glDeleteVertexArrays(1, &vao);
+    }
+
     void Quad::Draw(Program* shader)
     {
         shader->Use();

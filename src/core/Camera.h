@@ -50,7 +50,7 @@ namespace GLSLPT
 
         float focalDist;//焦距
         float aperture;//光圈
-        float fov;//可能是水平fov
+        float fov;//大概率是水平fov
         bool isMoving;
 
     private:
