@@ -177,8 +177,6 @@ void SaveFrame(const std::string filename)
 void Render()
 {
     renderer->Render();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, renderOptions.windowResolution.x, renderOptions.windowResolution.y);
     renderer->Present();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

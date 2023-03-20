@@ -596,6 +596,8 @@ namespace GLSLPT
 
     void Renderer::Present()
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, renderSize.x, renderSize.y);
         glActiveTexture(GL_TEXTURE0);
 
         // For the first sample or if the camera is moving, we do not have an image ready with all the tiles rendered, so we display a low res preview.
