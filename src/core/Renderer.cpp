@@ -27,6 +27,7 @@
 #include "ShaderIncludes.h"
 #include "Scene.h"
 #include "OpenImageDenoise/oidn.hpp"
+#include "Denoiser.h"
 
 namespace GLSLPT
 {
@@ -702,6 +703,7 @@ namespace GLSLPT
         {
             if (!denoised || (frameCounter % (scene->renderOptions.denoiserFrameCnt * (numTiles.x * numTiles.y)) == 0))
             {
+                /*
                 // FIXME: Figure out a way to have transparency with denoiser
                 glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
                 glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, denoiserInputFramePtr);
@@ -728,6 +730,8 @@ namespace GLSLPT
                 // Copy the denoised data to denoisedTexture
                 glBindTexture(GL_TEXTURE_2D, denoisedTexture);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, renderSize.x, renderSize.y, 0, GL_RGB, GL_FLOAT, frameOutputPtr);
+                */
+                Denoiser::GetInstance()->Denoise(tileOutputTexture[1 - currentBuffer], denoisedTexture, denoiserInputFramePtr, frameOutputPtr, renderSize);
 
                 denoised = true;
             }
