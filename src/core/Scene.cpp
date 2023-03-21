@@ -128,7 +128,7 @@ namespace GLSLPT
             envMap = nullptr;
         }
         envMapModified = true;
-        dirty = true;
+        //dirty = true;
     }
     //向场景中加载MeshInstance
     int Scene::AddMeshInstance(const MeshInstance& meshInstance)
@@ -211,7 +211,7 @@ namespace GLSLPT
             transforms[i] = meshInstances[i].transform;
 
         instancesModified = true;
-        dirty = true;
+        //dirty = true;
     }
 
     void Scene::ProcessScene()

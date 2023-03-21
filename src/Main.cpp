@@ -206,7 +206,7 @@ void Update(float secondsElapsed)
             scene->camera->Strafe(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
             ImGui::ResetMouseDragDelta(2);
         }
-        scene->dirty = true;
+        //scene->dirty = true;
     }
 
     renderer->Update(secondsElapsed);
@@ -536,6 +536,7 @@ void MainLoop(void* arg)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     Render();
+    //SDL_Delay(1000);
     SDL_GL_SwapWindow(loopdata.mWindow);
 }
 

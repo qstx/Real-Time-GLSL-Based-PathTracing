@@ -69,6 +69,7 @@ namespace GLSLPT
         , pathTraceShaderLowRes(nullptr)
         , outputShader(nullptr)
         , tonemapShader(nullptr)
+        , frameCompleted(false)
     {
         if (scene == nullptr)
         {
@@ -548,28 +549,28 @@ namespace GLSLPT
     {
         // If maxSpp was reached then stop rendering. 
         // TODO: Tonemapping and denosing still need to be able to run on final image
-        if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
-            return;
+        //if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
+        //    return;
 
         glActiveTexture(GL_TEXTURE0);
         //场景发生变化时的渲染过程：
         //绑定pathTraceFBOLowRes绘制到pathTraceTextureLowRes
-        if (scene->dirty)
-        {
-            // Renders a low res preview if camera/instances are modified
-            glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
-            glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
-            quad->Draw(pathTraceShaderLowRes);
+        //if (scene->dirty)
+        //{
+        //    // Renders a low res preview if camera/instances are modified
+        //    glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
+        //    glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
+        //    quad->Draw(pathTraceShaderLowRes);
 
-            scene->instancesModified = false;
-            scene->dirty = false;
-            scene->envMapModified = false;
-        }
+        //    scene->instancesModified = false;
+        //    scene->dirty = false;
+        //    scene->envMapModified = false;
+        //}
         //场景没有变化时的渲染过程：
         //1.绑定pathTraceFBO，从accumTexture采样，渲染到pathTraceTexture(Tile大小)
         //2.绑定accumFBO，从pathTraceTexture(Tile大小)采样，渲染到accumTexture
         //3.绑定outputFBO，从accumTexture采样，渲染到tileOutputTexture[currentBuffer]
-        else
+        //else
         {
             // Renders to pathTraceTexture while using previously accumulated samples from accumTexture
             // Rendering is done a tile per frame, so if a 500x500 image is rendered with a tileWidth and tileHeight of 250 then, all tiles (for a single sample) 
@@ -602,12 +603,12 @@ namespace GLSLPT
         glActiveTexture(GL_TEXTURE0);
 
         // For the first sample or if the camera is moving, we do not have an image ready with all the tiles rendered, so we display a low res preview.
-        if (scene->dirty || sampleCounter == 1)
-        {
-            glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
-            quad->Draw(tonemapShader);
-        }
-        else
+        //if (scene->dirty || sampleCounter == 1)
+        //{
+        //    glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
+        //    quad->Draw(tonemapShader);
+        //}
+        //else
         {
             if (scene->renderOptions.enableDenoiser && denoised)
                 glBindTexture(GL_TEXTURE_2D, denoisedTexture);
@@ -649,8 +650,8 @@ namespace GLSLPT
     {
         // If maxSpp was reached then stop updates
         // TODO: Tonemapping and denosing still need to be able to run on final image
-        if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
-            return;
+        //if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
+        //    return;
 
         // Update data for instances
         if (scene->instancesModified)
@@ -740,7 +741,7 @@ namespace GLSLPT
             denoised = false;
 
         // If scene was modified then clear out image for re-rendering
-        if (scene->dirty)
+        if (!frameCompleted)
         {
             tile.x = -1;
             tile.y = numTiles.y - 1;
@@ -767,6 +768,7 @@ namespace GLSLPT
                     tile.y = numTiles.y - 1;
                     sampleCounter++;
                     currentBuffer = 1 - currentBuffer;
+                    frameCompleted = true;
                 }
             }
         }
@@ -805,7 +807,7 @@ namespace GLSLPT
         glUniform1i(glGetUniformLocation(shaderObject, "enableEnvMap"), scene->envMap == nullptr ? false : scene->renderOptions.enableEnvMap);
         glUniform1f(glGetUniformLocation(shaderObject, "envMapIntensity"), scene->renderOptions.envMapIntensity);
         glUniform1f(glGetUniformLocation(shaderObject, "envMapRot"), scene->renderOptions.envMapRot / 360.0f);
-        glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->dirty ? 2 : scene->renderOptions.maxDepth);
+        glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->renderOptions.maxDepth);
         //glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
         glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
         glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);

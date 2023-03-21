@@ -45,7 +45,7 @@ namespace GLSLPT
             tileWidth = 100;
             tileHeight = 100;
             maxDepth = 2;
-            maxSpp = -1;
+            maxSpp = 3;
             RRDepth = 2;
             texArrayWidth = 2048;
             texArrayHeight = 2048;
@@ -164,6 +164,7 @@ namespace GLSLPT
         bool denoised;
 
         bool initialized;
+        bool frameCompleted;
 
     public:
         Renderer(Scene* scene, const std::string& shadersDirectory);
