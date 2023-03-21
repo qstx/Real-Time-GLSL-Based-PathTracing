@@ -740,20 +740,6 @@ namespace GLSLPT
         else
             denoised = false;
 
-        // If scene was modified then clear out image for re-rendering
-        if (!frameCompleted)
-        {
-            tile.x = -1;
-            tile.y = numTiles.y - 1;
-            sampleCounter = 1;
-            denoised = false;
-            frameCounter = 1;
-
-            // Clear out the accumulated texture for rendering a new image
-            glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-        else // Update render state
         {
             frameCounter++;
             tile.x++;
@@ -768,7 +754,18 @@ namespace GLSLPT
                     tile.y = numTiles.y - 1;
                     sampleCounter++;
                     currentBuffer = 1 - currentBuffer;
-                    frameCompleted = true;
+
+                    if (sampleCounter >= scene->renderOptions.maxSpp)
+                    {
+                        tile.x = -1;
+                        tile.y = numTiles.y - 1;
+                        sampleCounter = 1;
+                        denoised = false;
+                        frameCounter = 1;
+                        // Clear out the accumulated texture for rendering a new image
+                        glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
+                        glClear(GL_COLOR_BUFFER_BIT);
+                    }
                 }
             }
         }

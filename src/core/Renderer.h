@@ -45,7 +45,7 @@ namespace GLSLPT
             tileWidth = 100;
             tileHeight = 100;
             maxDepth = 2;
-            maxSpp = 3;
+            maxSpp = 10;
             RRDepth = 2;
             texArrayWidth = 2048;
             texArrayHeight = 2048;
