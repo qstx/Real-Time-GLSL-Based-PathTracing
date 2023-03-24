@@ -122,6 +122,14 @@ struct State
     Medium medium;
 };
 
+struct GBuffer
+{
+    float depth;
+    vec3 color;
+    vec3 normal;
+    vec3 position;
+};
+
 struct ScatterSampleRec
 {
     vec3 L;

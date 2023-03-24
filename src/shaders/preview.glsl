@@ -66,7 +66,11 @@ void main(void)
 
     Ray ray = Ray(camera.position + randomAperturePos, finalRayDir);
 
-    vec4 pixelColor = PathTrace(ray);
+    GBuffer gBuffer;
+    vec4 pixelColor = PathTrace(ray, gBuffer);
 
-    color = pixelColor;
+    //color = pixelColor;
+    //color = vec4(vec3(gBuffer.depth), 1.0f);//pixelColor;
+    //color = vec4(gBuffer.normal, 1.0f);//pixelColor;
+    color = vec4(gBuffer.position, 1.0f);//pixelColor;
 }

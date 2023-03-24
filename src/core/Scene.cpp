@@ -145,6 +145,7 @@ namespace GLSLPT
         return id;
     }
     //Build scene BVH
+    //根据场景中所有的mesh实例构建整个场景的bvh
     void Scene::createTLAS()
     {
         // Loop through all the mesh Instances and build a Top Level BVH
@@ -213,7 +214,7 @@ namespace GLSLPT
         instancesModified = true;
         dirty = true;
     }
-
+    //处理场景数据，包括各个Mesh的bvh、场景的bvh、各个mesh实例的bvh
     void Scene::ProcessScene()
     {
         printf("Processing scene data\n");

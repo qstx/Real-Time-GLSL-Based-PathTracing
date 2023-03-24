@@ -64,7 +64,7 @@ namespace GLSLPT
         , accumFBO(0)
         , outputFBO(0)
         , shadersDirectory(shadersDirectory)
-        , pathTraceShader(nullptr)
+        //, pathTraceShader(nullptr)
         , pathTraceShaderLowRes(nullptr)
         , outputShader(nullptr)
         , tonemapShader(nullptr)
@@ -121,7 +121,7 @@ namespace GLSLPT
         glDeleteFramebuffers(1, &outputFBO);
 
         // Delete shaders
-        delete pathTraceShader;
+        //delete pathTraceShader;
         delete pathTraceShaderLowRes;
         delete outputShader;
         delete tonemapShader;
@@ -269,7 +269,7 @@ namespace GLSLPT
         delete[] frameOutputPtr;
 
         // Delete shaders
-        delete pathTraceShader;
+        //delete pathTraceShader;
         delete pathTraceShaderLowRes;
         delete outputShader;
         delete tonemapShader;
@@ -381,7 +381,7 @@ namespace GLSLPT
     void Renderer::ReloadShaders()
     {
         // Delete shaders
-        delete pathTraceShader;
+        //delete pathTraceShader;
         delete pathTraceShaderLowRes;
         delete outputShader;
         delete tonemapShader;
@@ -392,7 +392,7 @@ namespace GLSLPT
     void Renderer::InitShaders()
     {
         ShaderInclude::ShaderSource vertexShaderSrcObj = ShaderInclude::load(shadersDirectory + "common/vertex.glsl");
-        ShaderInclude::ShaderSource pathTraceShaderSrcObj = ShaderInclude::load(shadersDirectory + "tile.glsl");
+        //ShaderInclude::ShaderSource pathTraceShaderSrcObj = ShaderInclude::load(shadersDirectory + "tile.glsl");
         ShaderInclude::ShaderSource pathTraceShaderLowResSrcObj = ShaderInclude::load(shadersDirectory + "preview.glsl");
         ShaderInclude::ShaderSource outputShaderSrcObj = ShaderInclude::load(shadersDirectory + "output.glsl");
         ShaderInclude::ShaderSource tonemapShaderSrcObj = ShaderInclude::load(shadersDirectory + "tonemap.glsl");
@@ -460,14 +460,14 @@ namespace GLSLPT
 
         if (pathtraceDefines.size() > 0)
         {
-            size_t idx = pathTraceShaderSrcObj.src.find("#version");
+            size_t idx = /*pathTraceShaderSrcObj.src.find("#version");
             if (idx != -1)
                 idx = pathTraceShaderSrcObj.src.find("\n", idx);
             else
                 idx = 0;
             pathTraceShaderSrcObj.src.insert(idx + 1, pathtraceDefines);
 
-            idx = pathTraceShaderLowResSrcObj.src.find("#version");
+            idx = */pathTraceShaderLowResSrcObj.src.find("#version");
             if (idx != -1)
                 idx = pathTraceShaderLowResSrcObj.src.find("\n", idx);
             else
@@ -485,38 +485,38 @@ namespace GLSLPT
             tonemapShaderSrcObj.src.insert(idx + 1, tonemapDefines);
         }
 
-        pathTraceShader = LoadShaders(vertexShaderSrcObj, pathTraceShaderSrcObj);
+        //pathTraceShader = LoadShaders(vertexShaderSrcObj, pathTraceShaderSrcObj);
         pathTraceShaderLowRes = LoadShaders(vertexShaderSrcObj, pathTraceShaderLowResSrcObj);
         outputShader = LoadShaders(vertexShaderSrcObj, outputShaderSrcObj);
         tonemapShader = LoadShaders(vertexShaderSrcObj, tonemapShaderSrcObj);
 
         // Setup shader uniforms
         GLuint shaderObject;
-        pathTraceShader->Use();
-        shaderObject = pathTraceShader->getObject();
+        //pathTraceShader->Use();
+        //shaderObject = pathTraceShader->getObject();
 
-        if (scene->envMap)
-        {
-            glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
-            glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
-        }
-        
-        glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndex);
-        glUniform2f(glGetUniformLocation(shaderObject, "resolution"), float(renderSize.x), float(renderSize.y));
-        glUniform2f(glGetUniformLocation(shaderObject, "invNumTiles"), invNumTiles.x, invNumTiles.y);
-        glUniform1i(glGetUniformLocation(shaderObject, "numOfLights"), scene->lights.size());
-        glUniform1i(glGetUniformLocation(shaderObject, "accumTexture"), 0);
-        glUniform1i(glGetUniformLocation(shaderObject, "BVH"), 1);
-        glUniform1i(glGetUniformLocation(shaderObject, "vertexIndicesTex"), 2);
-        glUniform1i(glGetUniformLocation(shaderObject, "verticesTex"), 3);
-        glUniform1i(glGetUniformLocation(shaderObject, "normalsTex"), 4);
-        glUniform1i(glGetUniformLocation(shaderObject, "materialsTex"), 5);
-        glUniform1i(glGetUniformLocation(shaderObject, "transformsTex"), 6);
-        glUniform1i(glGetUniformLocation(shaderObject, "lightsTex"), 7);
-        glUniform1i(glGetUniformLocation(shaderObject, "textureMapsArrayTex"), 8);
-        glUniform1i(glGetUniformLocation(shaderObject, "envMapTex"), 9);
-        glUniform1i(glGetUniformLocation(shaderObject, "envMapCDFTex"), 10);
-        pathTraceShader->StopUsing();
+        //if (scene->envMap)
+        //{
+        //    glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
+        //    glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
+        //}
+        //
+        //glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndex);
+        //glUniform2f(glGetUniformLocation(shaderObject, "resolution"), float(renderSize.x), float(renderSize.y));
+        //glUniform2f(glGetUniformLocation(shaderObject, "invNumTiles"), invNumTiles.x, invNumTiles.y);
+        //glUniform1i(glGetUniformLocation(shaderObject, "numOfLights"), scene->lights.size());
+        //glUniform1i(glGetUniformLocation(shaderObject, "accumTexture"), 0);
+        //glUniform1i(glGetUniformLocation(shaderObject, "BVH"), 1);
+        //glUniform1i(glGetUniformLocation(shaderObject, "vertexIndicesTex"), 2);
+        //glUniform1i(glGetUniformLocation(shaderObject, "verticesTex"), 3);
+        //glUniform1i(glGetUniformLocation(shaderObject, "normalsTex"), 4);
+        //glUniform1i(glGetUniformLocation(shaderObject, "materialsTex"), 5);
+        //glUniform1i(glGetUniformLocation(shaderObject, "transformsTex"), 6);
+        //glUniform1i(glGetUniformLocation(shaderObject, "lightsTex"), 7);
+        //glUniform1i(glGetUniformLocation(shaderObject, "textureMapsArrayTex"), 8);
+        //glUniform1i(glGetUniformLocation(shaderObject, "envMapTex"), 9);
+        //glUniform1i(glGetUniformLocation(shaderObject, "envMapCDFTex"), 10);
+        //pathTraceShader->StopUsing();
 
         pathTraceShaderLowRes->Use();
         shaderObject = pathTraceShaderLowRes->getObject();
@@ -624,11 +624,11 @@ namespace GLSLPT
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, scene->envMap->width, scene->envMap->height, 0, GL_RED, GL_FLOAT, scene->envMap->cdf);
 
                 GLuint shaderObject;
-                pathTraceShader->Use();
-                shaderObject = pathTraceShader->getObject();
-                glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
-                glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
-                pathTraceShader->StopUsing();
+                //pathTraceShader->Use();
+                //shaderObject = pathTraceShader->getObject();
+                //glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
+                //glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
+                //pathTraceShader->StopUsing();
 
                 pathTraceShaderLowRes->Use();
                 shaderObject = pathTraceShaderLowRes->getObject();
@@ -678,24 +678,24 @@ namespace GLSLPT
         // Update uniforms
 
         GLuint shaderObject;
-        pathTraceShader->Use();
-        shaderObject = pathTraceShader->getObject();
-        glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
-        glUniform3f(glGetUniformLocation(shaderObject, "camera.right"), scene->camera->right.x, scene->camera->right.y, scene->camera->right.z);
-        glUniform3f(glGetUniformLocation(shaderObject, "camera.up"), scene->camera->up.x, scene->camera->up.y, scene->camera->up.z);
-        glUniform3f(glGetUniformLocation(shaderObject, "camera.forward"), scene->camera->forward.x, scene->camera->forward.y, scene->camera->forward.z);
-        glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->fov);
-        glUniform1f(glGetUniformLocation(shaderObject, "camera.focalDist"), scene->camera->focalDist);
-        glUniform1f(glGetUniformLocation(shaderObject, "camera.aperture"), scene->camera->aperture);
-        glUniform1i(glGetUniformLocation(shaderObject, "enableEnvMap"), scene->envMap == nullptr ? false : scene->renderOptions.enableEnvMap);
-        glUniform1f(glGetUniformLocation(shaderObject, "envMapIntensity"), scene->renderOptions.envMapIntensity);
-        glUniform1f(glGetUniformLocation(shaderObject, "envMapRot"), scene->renderOptions.envMapRot / 360.0f);
-        glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->renderOptions.maxDepth);
-        glUniform2f(glGetUniformLocation(shaderObject, "tileOffset"), (float)tile.x * invNumTiles.x, (float)tile.y * invNumTiles.y);
-        glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
-        glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);
-        glUniform1i(glGetUniformLocation(shaderObject, "frameNum"), frameCounter);   
-        pathTraceShader->StopUsing();
+        //pathTraceShader->Use();
+        //shaderObject = pathTraceShader->getObject();
+        //glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
+        //glUniform3f(glGetUniformLocation(shaderObject, "camera.right"), scene->camera->right.x, scene->camera->right.y, scene->camera->right.z);
+        //glUniform3f(glGetUniformLocation(shaderObject, "camera.up"), scene->camera->up.x, scene->camera->up.y, scene->camera->up.z);
+        //glUniform3f(glGetUniformLocation(shaderObject, "camera.forward"), scene->camera->forward.x, scene->camera->forward.y, scene->camera->forward.z);
+        //glUniform1f(glGetUniformLocation(shaderObject, "camera.fov"), scene->camera->fov);
+        //glUniform1f(glGetUniformLocation(shaderObject, "camera.focalDist"), scene->camera->focalDist);
+        //glUniform1f(glGetUniformLocation(shaderObject, "camera.aperture"), scene->camera->aperture);
+        //glUniform1i(glGetUniformLocation(shaderObject, "enableEnvMap"), scene->envMap == nullptr ? false : scene->renderOptions.enableEnvMap);
+        //glUniform1f(glGetUniformLocation(shaderObject, "envMapIntensity"), scene->renderOptions.envMapIntensity);
+        //glUniform1f(glGetUniformLocation(shaderObject, "envMapRot"), scene->renderOptions.envMapRot / 360.0f);
+        //glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->renderOptions.maxDepth);
+        //glUniform2f(glGetUniformLocation(shaderObject, "tileOffset"), (float)tile.x * invNumTiles.x, (float)tile.y * invNumTiles.y);
+        //glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
+        //glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);
+        //glUniform1i(glGetUniformLocation(shaderObject, "frameNum"), frameCounter);   
+        //pathTraceShader->StopUsing();
 
         pathTraceShaderLowRes->Use();
         shaderObject = pathTraceShaderLowRes->getObject();

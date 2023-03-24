@@ -282,7 +282,7 @@ vec3 DirectLight(in Ray r, in State state, bool isSurface)
     return Ld;
 }
 
-vec4 PathTrace(Ray r)
+vec4 PathTrace(Ray r, inout GBuffer gBuffer)
 {
     vec3 radiance = vec3(0.0);
     vec3 throughput = vec3(1.0);
@@ -301,7 +301,7 @@ vec4 PathTrace(Ray r)
     for (state.depth = 0;; state.depth++)
     {
         bool hit = ClosestHit(r, state, lightSample);
-
+        //没有光线相交点，做背景处理并中断循环
         if (!hit)
         {
 #if defined(OPT_BACKGROUND) || defined(OPT_TRANSPARENT_BACKGROUND)
@@ -337,9 +337,16 @@ vec4 PathTrace(Ray r)
              }
              break;
         }
-
+        //有光线相交
         GetMaterial(state, r);
 
+        if (state.depth == 0)
+        {
+            gBuffer.depth = state.hitDist;
+            gBuffer.normal = (state.ffnormal+vec3(1.0f))*0.5f;
+            gBuffer.position = r.origin+ r.direction* state.hitDist;
+        }
+            
         // Gather radiance from emissive objects. Emission from meshes is not importance sampled
         radiance += state.mat.emission * throughput;
         

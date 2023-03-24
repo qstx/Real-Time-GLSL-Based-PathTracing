@@ -131,7 +131,7 @@ namespace GLSLPT
 
         // Shaders
         std::string shadersDirectory;
-        Program* pathTraceShader;//链接了vertex.glsl和tile.glsl
+        //Program* pathTraceShader;//链接了vertex.glsl和tile.glsl
         Program* pathTraceShaderLowRes;//链接了vertex.glsl和preview.glsl
         Program* outputShader;//链接了vertex.glsl和output.glsl
         Program* tonemapShader;//链接了vertex.glsl和tonemap.glsl
