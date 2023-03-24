@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 //负责向后面的片元着色器传入Quad四角各个点的NDC坐标系和UV坐标
-#version 330
+#version 430
 
 layout (location = 0) in vec2 position;
 layout (location = 1) in vec2 texCoords;

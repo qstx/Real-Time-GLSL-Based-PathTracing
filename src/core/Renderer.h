@@ -126,6 +126,7 @@ namespace GLSLPT
         // FBOs
         GLuint pathTraceFBO;
         GLuint pathTraceFBOLowRes;
+        GLuint denoiseFBO;
         GLuint accumFBO;
         GLuint outputFBO;
 
@@ -133,11 +134,15 @@ namespace GLSLPT
         std::string shadersDirectory;
         //Program* pathTraceShader;//链接了vertex.glsl和tile.glsl
         Program* pathTraceShaderLowRes;//链接了vertex.glsl和preview.glsl
+        Program* denoiseShader;//链接了vertex.glsl和denoise.glsl
         Program* outputShader;//链接了vertex.glsl和output.glsl
         Program* tonemapShader;//链接了vertex.glsl和tonemap.glsl
 
         // Render textures
         GLuint pathTraceTextureLowRes;//pathTraceFBOLowRes的颜色附件
+        GLuint gNormalTexture;//GBuffer中法线
+        GLuint gPositionTexture;//GBuffer中法线
+        GLuint denoiseTexture;
         GLuint pathTraceTexture;//pathTraceFBO的颜色附件，尺寸为Tile的大小
         GLuint accumTexture;//accumFBO的颜色附件
         GLuint tileOutputTexture[2];//outputFBO的颜色附件(轮流更换)

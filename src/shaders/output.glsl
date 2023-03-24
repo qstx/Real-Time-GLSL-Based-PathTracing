@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 //在片元着色器阶段对某个Texture采样
-#version 330
+#version 430
 
 out vec4 color;
 in vec2 TexCoords;

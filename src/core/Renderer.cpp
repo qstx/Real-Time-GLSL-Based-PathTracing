@@ -55,17 +55,22 @@ namespace GLSLPT
         , envMapTex(0)
         , envMapCDFTex(0)
         , pathTraceTextureLowRes(0)
+        , gNormalTexture(0)
+        , gPositionTexture(0)
+        , denoiseTexture(0)
         , pathTraceTexture(0)
         , accumTexture(0)
         , tileOutputTexture()
         , denoisedTexture(0)
         , pathTraceFBO(0)
         , pathTraceFBOLowRes(0)
+        , denoiseFBO(0)
         , accumFBO(0)
         , outputFBO(0)
         , shadersDirectory(shadersDirectory)
         //, pathTraceShader(nullptr)
         , pathTraceShaderLowRes(nullptr)
+        , denoiseShader(nullptr)
         , outputShader(nullptr)
         , tonemapShader(nullptr)
     {
@@ -103,6 +108,9 @@ namespace GLSLPT
         glDeleteTextures(1, &envMapCDFTex);
         glDeleteTextures(1, &pathTraceTexture);
         glDeleteTextures(1, &pathTraceTextureLowRes);
+        glDeleteTextures(1, &gNormalTexture);
+        glDeleteTextures(1, &gPositionTexture);
+        glDeleteTextures(1, &denoiseTexture);
         glDeleteTextures(1, &accumTexture);
         glDeleteTextures(1, &tileOutputTexture[0]);
         glDeleteTextures(1, &tileOutputTexture[1]);
@@ -117,12 +125,14 @@ namespace GLSLPT
         // Delete FBOs
         glDeleteFramebuffers(1, &pathTraceFBO);
         glDeleteFramebuffers(1, &pathTraceFBOLowRes);
+        glDeleteFramebuffers(1, &denoiseFBO);
         glDeleteFramebuffers(1, &accumFBO);
         glDeleteFramebuffers(1, &outputFBO);
 
         // Delete shaders
         //delete pathTraceShader;
         delete pathTraceShaderLowRes;
+        delete denoiseShader;
         delete outputShader;
         delete tonemapShader;
 
@@ -253,14 +263,17 @@ namespace GLSLPT
         // Delete textures
         glDeleteTextures(1, &pathTraceTexture);
         glDeleteTextures(1, &pathTraceTextureLowRes);
+        glDeleteTextures(1, &gNormalTexture);
+        glDeleteTextures(1, &gPositionTexture);
+        glDeleteTextures(1, &denoisedTexture);
         glDeleteTextures(1, &accumTexture);
         glDeleteTextures(1, &tileOutputTexture[0]);
         glDeleteTextures(1, &tileOutputTexture[1]);
-        glDeleteTextures(1, &denoisedTexture);
 
         // Delete FBOs
         glDeleteFramebuffers(1, &pathTraceFBO);
         glDeleteFramebuffers(1, &pathTraceFBOLowRes);
+        glDeleteFramebuffers(1, &denoiseFBO);
         glDeleteFramebuffers(1, &accumFBO);
         glDeleteFramebuffers(1, &outputFBO);
 
@@ -271,6 +284,7 @@ namespace GLSLPT
         // Delete shaders
         //delete pathTraceShader;
         delete pathTraceShaderLowRes;
+        delete denoiseShader;
         delete outputShader;
         delete tonemapShader;
 
@@ -319,13 +333,53 @@ namespace GLSLPT
         // Create Texture for FBO
         glGenTextures(1, &pathTraceTextureLowRes);
         glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowSize.x * pixelRatio, windowSize.y * pixelRatio, 0, GL_RGBA, GL_FLOAT, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glBindTexture(GL_TEXTURE_2D, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pathTraceTextureLowRes, 0);
+
+        glGenTextures(1, &gNormalTexture);
+        glBindTexture(GL_TEXTURE_2D, gNormalTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormalTexture, 0);
+
+        glGenTextures(1, &gPositionTexture);
+        glBindTexture(GL_TEXTURE_2D, gPositionTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gPositionTexture, 0);
+
+        GLuint pathTraceAttachments[] = { GL_COLOR_ATTACHMENT0 ,GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, pathTraceAttachments);
+
+        // Create FBOs for accum buffer
+        glGenFramebuffers(1, &denoiseFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, denoiseFBO);
+
+        // Create Texture for FBO
+        glGenTextures(1, &denoiseTexture);
+        glBindTexture(GL_TEXTURE_2D, denoiseTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, denoiseTexture, 0);
+        GLuint denoiseAttachments[] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, denoiseAttachments);
 
         // Create FBOs for accum buffer
         glGenFramebuffers(1, &accumFBO);
@@ -383,6 +437,7 @@ namespace GLSLPT
         // Delete shaders
         //delete pathTraceShader;
         delete pathTraceShaderLowRes;
+        delete denoiseShader;
         delete outputShader;
         delete tonemapShader;
 
@@ -394,6 +449,7 @@ namespace GLSLPT
         ShaderInclude::ShaderSource vertexShaderSrcObj = ShaderInclude::load(shadersDirectory + "common/vertex.glsl");
         //ShaderInclude::ShaderSource pathTraceShaderSrcObj = ShaderInclude::load(shadersDirectory + "tile.glsl");
         ShaderInclude::ShaderSource pathTraceShaderLowResSrcObj = ShaderInclude::load(shadersDirectory + "preview.glsl");
+        ShaderInclude::ShaderSource denoiseShaderSrcObj = ShaderInclude::load(shadersDirectory + "denoise.glsl");
         ShaderInclude::ShaderSource outputShaderSrcObj = ShaderInclude::load(shadersDirectory + "output.glsl");
         ShaderInclude::ShaderSource tonemapShaderSrcObj = ShaderInclude::load(shadersDirectory + "tonemap.glsl");
 
@@ -487,6 +543,7 @@ namespace GLSLPT
 
         //pathTraceShader = LoadShaders(vertexShaderSrcObj, pathTraceShaderSrcObj);
         pathTraceShaderLowRes = LoadShaders(vertexShaderSrcObj, pathTraceShaderLowResSrcObj);
+        denoiseShader = LoadShaders(vertexShaderSrcObj, denoiseShaderSrcObj);
         outputShader = LoadShaders(vertexShaderSrcObj, outputShaderSrcObj);
         tonemapShader = LoadShaders(vertexShaderSrcObj, tonemapShaderSrcObj);
 
@@ -546,11 +603,23 @@ namespace GLSLPT
     void Renderer::Render()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
-        glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
+        glViewport(0, 0, renderSize.x, renderSize.y);
         quad->Draw(pathTraceShaderLowRes);
 
         scene->instancesModified = false;
         scene->envMapModified = false;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, denoiseFBO);
+        glViewport(0, 0, renderSize.x, renderSize.y);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gNormalTexture);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, gPositionTexture);
+        //glUniform1i(glGetUniformLocation(denoiseShader->getObject(), "colorTex"), 0);
+        //glUniform1i(glGetUniformLocation(denoiseShader->getObject(), "normalTex"), 1);
+        quad->Draw(denoiseShader);
     }
 
     void Renderer::Present()
@@ -558,8 +627,7 @@ namespace GLSLPT
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, renderSize.x, renderSize.y);
         glActiveTexture(GL_TEXTURE0);
-
-        glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
+        glBindTexture(GL_TEXTURE_2D, denoiseTexture);
         quad->Draw(tonemapShader);
     }
 

@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 
-#version 330
+#version 430
+layout(location = 0)out vec4 color;
+layout(location = 1)out vec3 gNormal;
+layout(location = 2)out vec4 gPosition;
 
-out vec4 color;
 in vec2 TexCoords;
 
 #include common/uniforms.glsl
@@ -69,8 +71,7 @@ void main(void)
     GBuffer gBuffer;
     vec4 pixelColor = PathTrace(ray, gBuffer);
 
-    //color = pixelColor;
-    //color = vec4(vec3(gBuffer.depth), 1.0f);//pixelColor;
-    //color = vec4(gBuffer.normal, 1.0f);//pixelColor;
-    color = vec4(gBuffer.position, 1.0f);//pixelColor;
+    color = pixelColor;
+    gNormal = gBuffer.normal;
+    gPosition = vec4(gBuffer.position, gBuffer.depth);
 }

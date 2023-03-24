@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#version 330
+#version 430
 
 out vec4 outCol;
 in vec2 TexCoords;
