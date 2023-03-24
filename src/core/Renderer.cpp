@@ -545,53 +545,12 @@ namespace GLSLPT
 
     void Renderer::Render()
     {
-        // If maxSpp was reached then stop rendering. 
-        // TODO: Tonemapping and denosing still need to be able to run on final image
-        if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
-            return;
+        glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
+        glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
+        quad->Draw(pathTraceShaderLowRes);
 
-        glActiveTexture(GL_TEXTURE0);
-        //场景发生变化时的渲染过程：
-        //绑定pathTraceFBOLowRes绘制到pathTraceTextureLowRes
-        if (scene->dirty)
-        {
-            // Renders a low res preview if camera/instances are modified
-            glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBOLowRes);
-            glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
-            quad->Draw(pathTraceShaderLowRes);
-
-            scene->instancesModified = false;
-            scene->dirty = false;
-            scene->envMapModified = false;
-        }
-        //场景没有变化时的渲染过程：
-        //1.绑定pathTraceFBO，从accumTexture采样，渲染到pathTraceTexture(Tile大小)
-        //2.绑定accumFBO，从pathTraceTexture(Tile大小)采样，渲染到accumTexture
-        //3.绑定outputFBO，从accumTexture采样，渲染到tileOutputTexture[currentBuffer]
-        else
-        {
-            // Renders to pathTraceTexture while using previously accumulated samples from accumTexture
-            // Rendering is done a tile per frame, so if a 500x500 image is rendered with a tileWidth and tileHeight of 250 then, all tiles (for a single sample) 
-            // get rendered after 4 frames
-            glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBO);
-            glViewport(0, 0, tileWidth, tileHeight);
-            glBindTexture(GL_TEXTURE_2D, accumTexture);
-            quad->Draw(pathTraceShader);
-
-            // pathTraceTexture is copied to accumTexture and re-used as input for the first step.
-            glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-            glViewport(tileWidth * tile.x, tileHeight * tile.y, tileWidth, tileHeight);
-            glBindTexture(GL_TEXTURE_2D, pathTraceTexture);
-            quad->Draw(outputShader);
-
-            // Here we render to tileOutputTexture[currentBuffer] but display tileOutputTexture[1-currentBuffer] until all tiles are done rendering
-            // When all tiles are rendered, we flip the bound texture and start rendering to the other one
-            glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tileOutputTexture[currentBuffer], 0);
-            glViewport(0, 0, renderSize.x, renderSize.y);
-            glBindTexture(GL_TEXTURE_2D, accumTexture);
-            quad->Draw(tonemapShader);
-        }
+        scene->instancesModified = false;
+        scene->envMapModified = false;
     }
 
     void Renderer::Present()
@@ -600,21 +559,8 @@ namespace GLSLPT
         glViewport(0, 0, renderSize.x, renderSize.y);
         glActiveTexture(GL_TEXTURE0);
 
-        // For the first sample or if the camera is moving, we do not have an image ready with all the tiles rendered, so we display a low res preview.
-        if (scene->dirty || sampleCounter == 1)
-        {
-            glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
-            quad->Draw(tonemapShader);
-        }
-        else
-        {
-            if (scene->renderOptions.enableDenoiser && denoised)
-                glBindTexture(GL_TEXTURE_2D, denoisedTexture);
-            else
-                glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
-
-            quad->Draw(outputShader);
-        }
+        glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
+        quad->Draw(tonemapShader);
     }
 
     float Renderer::GetProgress()
@@ -646,11 +592,6 @@ namespace GLSLPT
     }
     void Renderer::Update(float secondsElapsed)
     {
-        // If maxSpp was reached then stop updates
-        // TODO: Tonemapping and denosing still need to be able to run on final image
-        if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
-            return;
-
         // Update data for instances
         if (scene->instancesModified)
         {
@@ -734,39 +675,6 @@ namespace GLSLPT
         }
         else
             denoised = false;
-
-        // If scene was modified then clear out image for re-rendering
-        if (scene->dirty)
-        {
-            tile.x = -1;
-            tile.y = numTiles.y - 1;
-            sampleCounter = 1;
-            denoised = false;
-            frameCounter = 1;
-
-            // Clear out the accumulated texture for rendering a new image
-            glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-        else // Update render state
-        {
-            frameCounter++;
-            tile.x++;
-            if (tile.x >= numTiles.x)
-            {
-                tile.x = 0;
-                tile.y--;
-                if (tile.y < 0)
-                {
-                    // If we've reached here, it means all the tiles have been rendered (for a single sample) and the image can now be displayed.
-                    tile.x = 0;
-                    tile.y = numTiles.y - 1;
-                    sampleCounter++;
-                    currentBuffer = 1 - currentBuffer;
-                }
-            }
-        }
-
         // Update uniforms
 
         GLuint shaderObject;
@@ -801,7 +709,7 @@ namespace GLSLPT
         glUniform1i(glGetUniformLocation(shaderObject, "enableEnvMap"), scene->envMap == nullptr ? false : scene->renderOptions.enableEnvMap);
         glUniform1f(glGetUniformLocation(shaderObject, "envMapIntensity"), scene->renderOptions.envMapIntensity);
         glUniform1f(glGetUniformLocation(shaderObject, "envMapRot"), scene->renderOptions.envMapRot / 360.0f);
-        glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->dirty ? 2 : scene->renderOptions.maxDepth);
+        glUniform1i(glGetUniformLocation(shaderObject, "maxDepth"), scene->renderOptions.maxDepth);
         //glUniform3f(glGetUniformLocation(shaderObject, "camera.position"), scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
         glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
         glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);

@@ -536,6 +536,7 @@ void MainLoop(void* arg)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     Render();
+    SDL_Delay(16);
     SDL_GL_SwapWindow(loopdata.mWindow);
 }
 
