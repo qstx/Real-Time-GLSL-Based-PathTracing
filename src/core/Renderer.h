@@ -52,7 +52,7 @@ namespace GLSLPT
             denoiserFrameCnt = 20;
             enableRR = true;
             enableDenoiser = false;
-            enableTonemap = true;
+            enableTonemap = false;
             enableAces = false;
             openglNormalMap = true;
             enableEnvMap = false;
@@ -66,6 +66,12 @@ namespace GLSLPT
             envMapIntensity = 1.0f;
             envMapRot = 0.0f;
             roughnessMollificationAmt = 0.0f;
+
+            sigmaP = 6.83;
+            sigmaC = 10;
+            sigmaD = 0.048;
+            sigmaN = 0.62;
+            kernelSize = 33;
         }
 
         iVec2 renderResolution;
@@ -97,6 +103,12 @@ namespace GLSLPT
         float envMapIntensity;
         float envMapRot;
         float roughnessMollificationAmt;
+
+        float sigmaP;
+        float sigmaC;
+        float sigmaD;
+        float sigmaN;
+        int kernelSize;
     };
 
     class Scene;
@@ -124,7 +136,7 @@ namespace GLSLPT
         GLuint envMapCDFTex;
 
         // FBOs
-        GLuint pathTraceFBO;
+        //GLuint pathTraceFBO;
         GLuint pathTraceFBOLowRes;
         GLuint denoiseFBO;
         GLuint accumFBO;

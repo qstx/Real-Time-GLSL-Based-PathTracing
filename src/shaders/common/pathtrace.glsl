@@ -306,7 +306,12 @@ vec4 PathTrace(Ray r, inout GBuffer gBuffer)
         {
 #if defined(OPT_BACKGROUND) || defined(OPT_TRANSPARENT_BACKGROUND)
             if (state.depth == 0)
+            {
                 alpha = 0.0;
+                //gBuffer.depth = state.hitDist;
+                //gBuffer.normal = state.ffnormal;
+                //gBuffer.position = r.origin + r.direction * state.hitDist;
+            }
 #endif
 
 #ifdef OPT_HIDE_EMITTERS
@@ -343,7 +348,7 @@ vec4 PathTrace(Ray r, inout GBuffer gBuffer)
         if (state.depth == 0)
         {
             gBuffer.depth = state.hitDist;
-            gBuffer.normal = (state.ffnormal+vec3(1.0f))*0.5f;
+            gBuffer.normal = state.ffnormal;
             gBuffer.position = r.origin+ r.direction* state.hitDist;
         }
             

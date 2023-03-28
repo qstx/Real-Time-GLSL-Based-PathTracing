@@ -62,7 +62,6 @@ namespace GLSLPT
         , accumTexture(0)
         , tileOutputTexture()
         , denoisedTexture(0)
-        , pathTraceFBO(0)
         , pathTraceFBOLowRes(0)
         , denoiseFBO(0)
         , accumFBO(0)
@@ -123,7 +122,6 @@ namespace GLSLPT
         glDeleteBuffers(1, &normalsBuffer);
 
         // Delete FBOs
-        glDeleteFramebuffers(1, &pathTraceFBO);
         glDeleteFramebuffers(1, &pathTraceFBOLowRes);
         glDeleteFramebuffers(1, &denoiseFBO);
         glDeleteFramebuffers(1, &accumFBO);
@@ -271,7 +269,6 @@ namespace GLSLPT
         glDeleteTextures(1, &tileOutputTexture[1]);
 
         // Delete FBOs
-        glDeleteFramebuffers(1, &pathTraceFBO);
         glDeleteFramebuffers(1, &pathTraceFBOLowRes);
         glDeleteFramebuffers(1, &denoiseFBO);
         glDeleteFramebuffers(1, &accumFBO);
@@ -312,19 +309,6 @@ namespace GLSLPT
 
         tile.x = -1;
         tile.y = numTiles.y - 1;
-
-        // Create FBOs for path trace shader 
-        glGenFramebuffers(1, &pathTraceFBO);
-        glBindFramebuffer(GL_FRAMEBUFFER, pathTraceFBO);
-
-        // Create Texture for FBO
-        glGenTextures(1, &pathTraceTexture);
-        glBindTexture(GL_TEXTURE_2D, pathTraceTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tileWidth, tileHeight, 0, GL_RGBA, GL_FLOAT, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pathTraceTexture, 0);
 
         // Create FBOs for low res preview shader 
         glGenFramebuffers(1, &pathTraceFBOLowRes);
@@ -549,31 +533,15 @@ namespace GLSLPT
 
         // Setup shader uniforms
         GLuint shaderObject;
-        //pathTraceShader->Use();
-        //shaderObject = pathTraceShader->getObject();
-
-        //if (scene->envMap)
-        //{
-        //    glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
-        //    glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
-        //}
-        //
-        //glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndex);
-        //glUniform2f(glGetUniformLocation(shaderObject, "resolution"), float(renderSize.x), float(renderSize.y));
-        //glUniform2f(glGetUniformLocation(shaderObject, "invNumTiles"), invNumTiles.x, invNumTiles.y);
-        //glUniform1i(glGetUniformLocation(shaderObject, "numOfLights"), scene->lights.size());
-        //glUniform1i(glGetUniformLocation(shaderObject, "accumTexture"), 0);
-        //glUniform1i(glGetUniformLocation(shaderObject, "BVH"), 1);
-        //glUniform1i(glGetUniformLocation(shaderObject, "vertexIndicesTex"), 2);
-        //glUniform1i(glGetUniformLocation(shaderObject, "verticesTex"), 3);
-        //glUniform1i(glGetUniformLocation(shaderObject, "normalsTex"), 4);
-        //glUniform1i(glGetUniformLocation(shaderObject, "materialsTex"), 5);
-        //glUniform1i(glGetUniformLocation(shaderObject, "transformsTex"), 6);
-        //glUniform1i(glGetUniformLocation(shaderObject, "lightsTex"), 7);
-        //glUniform1i(glGetUniformLocation(shaderObject, "textureMapsArrayTex"), 8);
-        //glUniform1i(glGetUniformLocation(shaderObject, "envMapTex"), 9);
-        //glUniform1i(glGetUniformLocation(shaderObject, "envMapCDFTex"), 10);
-        //pathTraceShader->StopUsing();
+        denoiseShader->Use();
+        shaderObject = denoiseShader->getObject();
+        glUniform2f(glGetUniformLocation(shaderObject, "resolution"), float(renderSize.x), float(renderSize.y));
+        glUniform1f(glGetUniformLocation(shaderObject, "sigmaP"), scene->renderOptions.sigmaP);
+        glUniform1f(glGetUniformLocation(shaderObject, "sigmaC"), scene->renderOptions.sigmaC);
+        glUniform1f(glGetUniformLocation(shaderObject, "sigmaN"), scene->renderOptions.sigmaN);
+        glUniform1f(glGetUniformLocation(shaderObject, "sigmaD"), scene->renderOptions.sigmaD);
+        glUniform1i(glGetUniformLocation(shaderObject, "kernelSize"), scene->renderOptions.kernelSize);
+        denoiseShader->StopUsing();
 
         pathTraceShaderLowRes->Use();
         shaderObject = pathTraceShaderLowRes->getObject();
@@ -627,7 +595,10 @@ namespace GLSLPT
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, renderSize.x, renderSize.y);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, denoiseTexture);
+        if(scene->renderOptions.enableDenoiser)
+            glBindTexture(GL_TEXTURE_2D, denoiseTexture);
+        else
+            glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
         quad->Draw(tonemapShader);
     }
 

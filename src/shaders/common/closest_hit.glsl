@@ -63,6 +63,8 @@ if(state.depth > 0)
                 lightSample.pdf = (t * t) / (area * cosTheta);
                 lightSample.emission = emission;
                 state.isEmitter = true;
+                state.normal = normal;
+                state.ffnormal = dot(state.normal, r.direction) <= 0.0 ? state.normal : -state.normal;
             }
         }
 
