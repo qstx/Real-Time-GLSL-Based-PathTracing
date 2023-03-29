@@ -68,7 +68,7 @@ namespace GLSLPT
             roughnessMollificationAmt = 0.0f;
 
             sigmaP = 6.83;
-            sigmaC = 10;
+            sigmaC = 0.3;
             sigmaD = 0.048;
             sigmaN = 0.62;
             kernelSize = 33;
@@ -136,35 +136,30 @@ namespace GLSLPT
         GLuint envMapCDFTex;
 
         // FBOs
-        //GLuint pathTraceFBO;
-        GLuint pathTraceFBOLowRes;
+        GLuint pathTraceFBO;
         GLuint denoiseFBO;
-        GLuint accumFBO;
-        GLuint outputFBO;
+        GLuint copyFBO;
 
         // Shaders
         std::string shadersDirectory;
-        //Program* pathTraceShader;//链接了vertex.glsl和tile.glsl
-        Program* pathTraceShaderLowRes;//链接了vertex.glsl和preview.glsl
+        Program* pathTraceShader;//链接了vertex.glsl和preview.glsl
         Program* denoiseShader;//链接了vertex.glsl和denoise.glsl
-        Program* outputShader;//链接了vertex.glsl和output.glsl
         Program* tonemapShader;//链接了vertex.glsl和tonemap.glsl
+        Program* copyShader;//链接了vertex.glsl和output.glsl
 
         // Render textures
-        GLuint pathTraceTextureLowRes;//pathTraceFBOLowRes的颜色附件
+        GLuint pathTraceTexture[2];//pathTraceFBOLowRes的颜色附件
         GLuint gNormalTexture;//GBuffer中法线
         GLuint gPositionTexture;//GBuffer中法线
         GLuint denoiseTexture;
-        GLuint pathTraceTexture;//pathTraceFBO的颜色附件，尺寸为Tile的大小
-        GLuint accumTexture;//accumFBO的颜色附件
-        GLuint tileOutputTexture[2];//outputFBO的颜色附件(轮流更换)
-        GLuint denoisedTexture;
+        GLuint denoiseDebugTexture;
 
         // Render resolution and window resolution
         iVec2 renderSize;
         iVec2 windowSize;
 
         // Variables to track rendering status
+        int currentPathTraceOutput;
         iVec2 tile;
         iVec2 numTiles;
         Vec2 invNumTiles;
@@ -173,12 +168,6 @@ namespace GLSLPT
         int currentBuffer;
         int frameCounter;
         int sampleCounter;
-        float pixelRatio;
-
-        // Denoiser output
-        Vec3* denoiserInputFramePtr;
-        Vec3* frameOutputPtr;
-        bool denoised;
 
         bool initialized;
 
@@ -194,6 +183,8 @@ namespace GLSLPT
         void Present();
         //根据场景是否发生改变或者是否到达maxSpp来决定是否更新渲染数据
         void Update(float secondsElapsed);
+        //主要用于记录当前帧的相机状态，供下一帧计算motion vector
+        void PostUpdate();
         float GetProgress();
         int GetSampleCount();
         void GetOutputBuffer(unsigned char**, int& w, int& h);

@@ -356,7 +356,7 @@ void MainLoop(void* arg)
         if (ImGui::CollapsingHeader("Joint Bilateral Filtering"))
         {
             reloadShaders |= ImGui::SliderFloat("Sigma_P", &renderOptions.sigmaP,0.1f,100.0f);
-            reloadShaders |= ImGui::SliderFloat("Sigma_C", &renderOptions.sigmaC,0.1f,100.0f);
+            reloadShaders |= ImGui::SliderFloat("Sigma_C", &renderOptions.sigmaC,0.1f,10.0f);
             reloadShaders |= ImGui::SliderFloat("Sigma_D", &renderOptions.sigmaD,0.001f,1.0f);
             reloadShaders |= ImGui::SliderFloat("Sigma_N", &renderOptions.sigmaN,0.1f,5.0f);
             reloadShaders |= ImGui::SliderInt("KernelSize", &renderOptions.kernelSize,1,64);
@@ -545,7 +545,8 @@ void MainLoop(void* arg)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     Render();
-    SDL_Delay(8);
+    renderer->PostUpdate();
+    SDL_Delay(16);
     SDL_GL_SwapWindow(loopdata.mWindow);
 }
 
