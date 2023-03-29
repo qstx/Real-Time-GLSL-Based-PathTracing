@@ -3,6 +3,8 @@ Real-Time GLSL-Based PathTracing
 ==========
 This is a real-time ray tracing project with GPU-denoise. The general framework of the project comes from knightcrawler25/GLSL-PathTracer (https://github.com/knightcrawler25/GLSL-PathTracer) 
 
+It's about 45 FPS when running on 3060Ti and I5-12600KF.
+
 Features
 --------
 - Only 1 spp for each pixel
@@ -10,7 +12,7 @@ Features
 - Temporal filtering
 - Outlier remove
 
-Other Features
+More Features
 --------
 - Two-level BVH for instancing
 - SAH BVH
@@ -43,5 +45,6 @@ Steps
 
 TODO
 --------
-- add svgf
-- complete the GBuffer when no hit to support IBL
+- Add svgf
+- Complete the GBuffer when no hit to support IBL
+- Use a more efficient filter kernel
